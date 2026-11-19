@@ -35,6 +35,7 @@ class TrackingWheel {
          * @param wheelDiameter the diameter of the wheel
          * @param distance distance between the tracking wheel and the center of rotation in inches
          * @param gearRatio gear ratio of the tracking wheel, defaults to 1
+         * @param angle angle clockwise to normal horizontal/vertical
          *
          * @b Example
          * @code {.cpp}
@@ -67,6 +68,7 @@ class TrackingWheel {
          * @param wheelDiameter the diameter of the wheel
          * @param distance distance between the tracking wheel and the center of rotation in inches
          * @param gearRatio gear ratio of the tracking wheel, defaults to 1
+         * @param angle angle clockwise to normal horizontal/vertical
          *
          * @b Example
          * @code {.cpp}
@@ -99,6 +101,7 @@ class TrackingWheel {
          * @param wheelDiameter the diameter of the wheel
          * @param distance half the track width of the drivetrain in inches
          * @param rpm theoretical maximum rpm of the drivetrain wheels
+         * @param angle angle clockwise to normal horizontal/vertical
          *
          * @b Example
          * @code {.cpp}
@@ -167,6 +170,11 @@ class TrackingWheel {
          * @endcode
          */
         float getOffset();
+        /**
+         * @brief Get the angle of the tracking wheel from the expected horizontal/vertical
+         * 
+         * @return float angle in degrees
+         */
         float getAngle();
         /**
          * @brief Get the type of tracking wheel
