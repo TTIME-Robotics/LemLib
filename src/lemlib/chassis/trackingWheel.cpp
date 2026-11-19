@@ -5,26 +5,29 @@
 #include "pros/motors.h"
 
 lemlib::TrackingWheel::TrackingWheel(pros::adi::Encoder* encoder, float wheelDiameter, float distance,
-                                     float gearRatio) {
+                                     float gearRatio, float angle) {
     this->encoder = encoder;
     this->diameter = wheelDiameter;
     this->distance = distance;
     this->gearRatio = gearRatio;
+    this->angle = angle;
 }
 
-lemlib::TrackingWheel::TrackingWheel(pros::Rotation* encoder, float wheelDiameter, float distance, float gearRatio) {
+lemlib::TrackingWheel::TrackingWheel(pros::Rotation* encoder, float wheelDiameter, float distance, float gearRatio, float angle) {
     this->rotation = encoder;
     this->diameter = wheelDiameter;
     this->distance = distance;
     this->gearRatio = gearRatio;
+    this->angle = angle;
 }
 
-lemlib::TrackingWheel::TrackingWheel(pros::MotorGroup* motors, float wheelDiameter, float distance, float rpm) {
+lemlib::TrackingWheel::TrackingWheel(pros::MotorGroup* motors, float wheelDiameter, float distance, float rpm, float angle) {
     this->motors = motors;
     this->motors->set_encoder_units_all(pros::E_MOTOR_ENCODER_ROTATIONS);
     this->diameter = wheelDiameter;
     this->distance = distance;
     this->rpm = rpm;
+    this->angle = angle;
 }
 
 void lemlib::TrackingWheel::reset() {
@@ -60,6 +63,8 @@ float lemlib::TrackingWheel::getDistanceTraveled() {
 }
 
 float lemlib::TrackingWheel::getOffset() { return this->distance; }
+
+float lemlib::TrackingWheel::getAngle() { return this->angle; }
 
 int lemlib::TrackingWheel::getType() {
     if (this->motors != nullptr) return 1;

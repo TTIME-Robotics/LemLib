@@ -73,6 +73,70 @@ lemlib::Pose lemlib::estimatePose(float time, bool radians) {
 }
 
 void lemlib::update() {
+
+    if (odomSensors.vertical1 != nullptr &&
+        odomSensors.vertical2 != nullptr &&
+        odomSensors.imu != nullptr &&
+        odomSensors.horizontal1 == nullptr &&
+        odomSensors.horizontal2 == nullptr
+    ) { // Special case (allows for 45deg odom)
+        lemlib::TrackingWheel* w1 = odomSensors.vertical1; // first angled wheel
+        lemlib::TrackingWheel* w2 = odomSensors.vertical2; // second angled wheel
+        static float prev1 = 0, prev2 = 0;
+
+        // heading change from the IMU
+        float imuRaw = degToRad(odomSensors.imu->get_rotation());
+        float deltaHeading = imuRaw - prevImu;
+        prevImu = imuRaw;
+
+        // wheel readings, with the rotation contribution removed
+        float raw1 = w1->getDistanceTraveled();
+        float raw2 = w2->getDistanceTraveled();
+        float arc1 = (raw1 - prev1) + deltaHeading * w1->getOffset();
+        float arc2 = (raw2 - prev2) + deltaHeading * w2->getOffset();
+        prev1 = raw1;
+        prev2 = raw2;
+
+        // solve the 2x2 system for the local displacement (x right, y forward)
+        float p1 = degToRad(w1->getAngle());
+        float p2 = degToRad(w2->getAngle());
+        float ax1 = sin(p1), ay1 = cos(p1);
+        float ax2 = sin(p2), ay2 = cos(p2);
+        float det = ax1 * ay2 - ay1 * ax2; // = sin(p1 - p2), zero if the wheels are parallel
+        if (fabs(det) < 1e-6) return;      // degenerate mounting, skip the update
+
+        float arcX = (ay2 * arc1 - ay1 * arc2) / det;
+        float arcY = (ax1 * arc2 - ax2 * arc1) / det;
+
+        // arc -> chord
+        float k = (fabs(deltaHeading) < 1e-6) ? 1.0f : 2 * sin(deltaHeading / 2) / deltaHeading;
+        float localX = arcX * k;
+        float localY = arcY * k;
+
+        // new heading
+        float heading = odomPose.theta + deltaHeading;
+        float avgHeading = odomPose.theta + deltaHeading / 2;
+
+        // save previous pose
+        lemlib::Pose prevPose = odomPose;
+
+        // local (x right, y forward) -> global
+        odomPose.x += localY * sin(avgHeading) + localX * cos(avgHeading);
+        odomPose.y += localY * cos(avgHeading) - localX * sin(avgHeading);
+        odomPose.theta = heading;
+
+        // speed
+        odomSpeed.x = ema((odomPose.x - prevPose.x) / 0.01, odomSpeed.x, 0.95);
+        odomSpeed.y = ema((odomPose.y - prevPose.y) / 0.01, odomSpeed.y, 0.95);
+        odomSpeed.theta = ema((odomPose.theta - prevPose.theta) / 0.01, odomSpeed.theta, 0.95);
+
+        // local speed
+        odomLocalSpeed.x = ema(localX / 0.01, odomLocalSpeed.x, 0.95);
+        odomLocalSpeed.y = ema(localY / 0.01, odomLocalSpeed.y, 0.95);
+        odomLocalSpeed.theta = ema(deltaHeading / 0.01, odomLocalSpeed.theta, 0.95);
+        return;
+    }
+    
     // TODO: add particle filter
     // get the current sensor values
     float vertical1Raw = 0;

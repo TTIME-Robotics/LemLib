@@ -59,7 +59,7 @@ class TrackingWheel {
          * lemlib::TrackingWheel horizontalTrackingWheel(&horizontalEncoder, lemlib::Omniwheel::OLD_325, -2, 5.0/3.0);
          * @endcode
          */
-        TrackingWheel(pros::adi::Encoder* encoder, float wheelDiameter, float distance, float gearRatio = 1);
+        TrackingWheel(pros::adi::Encoder* encoder, float wheelDiameter, float distance, float gearRatio = 1, float angle=0);
         /**
          * @brief Create a new tracking wheel
          *
@@ -91,7 +91,7 @@ class TrackingWheel {
          * lemlib::TrackingWheel horizontalTrackingWheel(&horizontalEncoder, lemlib::Omniwheel::OLD_325, -2, 5.0/3.0);
          * @endcode
          */
-        TrackingWheel(pros::Rotation* encoder, float wheelDiameter, float distance, float gearRatio = 1);
+        TrackingWheel(pros::Rotation* encoder, float wheelDiameter, float distance, float gearRatio = 1, float angle=0);
         /**
          * @brief Create a new tracking wheel
          *
@@ -118,7 +118,7 @@ class TrackingWheel {
          * lemlib::TrackingWheel leftTrackingWheel(&leftMotors, lemlib::Omniwheel::OLD_4, -5, 360);
          * @endcode
          */
-        TrackingWheel(pros::MotorGroup* motors, float wheelDiameter, float distance, float rpm);
+        TrackingWheel(pros::MotorGroup* motors, float wheelDiameter, float distance, float rpm, float angle=0);
         /**
          * @brief Reset the tracking wheel position to 0
          *
@@ -167,6 +167,7 @@ class TrackingWheel {
          * @endcode
          */
         float getOffset();
+        float getAngle();
         /**
          * @brief Get the type of tracking wheel
          *
@@ -192,5 +193,6 @@ class TrackingWheel {
         pros::Rotation* rotation = nullptr;
         pros::MotorGroup* motors = nullptr;
         float gearRatio = 1;
+        float angle = 0;
 };
 } // namespace lemlib
